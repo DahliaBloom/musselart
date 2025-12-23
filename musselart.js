@@ -24,7 +24,7 @@ new p5((p) => {
     ],
     friction: 0.64,
     springStrength: 0.1,
-    letterSpacing: 1.6 // Slightly more space for elegance
+    letterSpacing: 1.8 // Slightly more space for elegance
   };
 
   p.preload = () => {
