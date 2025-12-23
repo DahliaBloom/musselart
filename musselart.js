@@ -22,8 +22,8 @@ new p5((p) => {
       '#ffd6ff', // Hint of Pink Glow
       '#bde0fe'  // Soft Pastel Blue
     ],
-    friction: 0.64,
-    springStrength: 0.1,
+    friction: 0.84,
+    springStrength: 1,
     letterSpacing: 1.8 // Slightly more space for elegance
   };
 
@@ -45,25 +45,31 @@ new p5((p) => {
     }
 
     update() {
-      // Spring back to origin
-      let force = p.createVector(this.origin.x - this.pos.x, this.origin.y - this.pos.y);
-      let distToOrigin = force.mag();
-      if (distToOrigin > 0) {
+      // Global dynamic movement: The whole name sways as one unit
+      let globalTime = p.frameCount * 0.015;
+      let globalX = p.sin(globalTime) * 15; // Sway left/right
+      let globalY = p.cos(globalTime * 0.8) * 10; // Bob up/down
+      
+      // Coordinated wave motion passing through the letters
+      let waveY = p.sin(globalTime * 1.5 + this.origin.x * 0.005) * 6;
+
+      // New dynamic target position (Origin + Global Movement + Local Wave)
+      let targetX = this.origin.x + globalX;
+      let targetY = this.origin.y + globalY + waveY;
+
+      // Spring back to the moving target
+      let force = p.createVector(targetX - this.pos.x, targetY - this.pos.y);
+      let distToTarget = force.mag();
+      if (distToTarget > 0) {
         force.normalize();
-        force.mult(distToOrigin * config.springStrength);
+        force.mult(distToTarget * config.springStrength);
         this.acc.add(force);
       }
 
-      // Decent looping animation: Subtle breathing wave
-      let time = p.frameCount * 0.01;
-      let waveX = p.sin(time + this.origin.x * 0.005) * 0.5;
-      let waveY = p.cos(time * 0.6 + this.origin.x * 0.005) * 0.8;
-      
-      // Individual organic float (very subtle)
-      let floatX = p.sin(time * 0.3 + this.noiseOffset) * 0.3;
-      let floatY = p.cos(time * 0.4 + this.noiseOffset) * 0.3;
-      
-      this.acc.add(p.createVector(waveX + floatX, waveY + floatY));
+      // Individual organic micro-life (very subtle)
+      let floatX = p.sin(p.frameCount * 0.03 + this.noiseOffset) * 0.4;
+      let floatY = p.cos(p.frameCount * 0.04 + this.noiseOffset) * 0.4;
+      this.acc.add(p.createVector(floatX, floatY));
 
       this.vel.add(this.acc);
       this.vel.mult(config.friction);
