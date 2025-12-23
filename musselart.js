@@ -1,6 +1,5 @@
 /**
  * MusselArt.js
- * Interactive fractal mussel art for 'Sabrina'
  * Using Instance Mode for better reliability
  */
 
@@ -9,7 +8,7 @@ new p5((p) => {
   let mussels = [];
   let heartPoints = [];
   const config = {
-    name: 'Sabrina',
+    name: 'Hey',
     fontSize: 200,
     pointDensity: 0.15,
     background: '#000814',
@@ -130,14 +129,18 @@ new p5((p) => {
     mussels = [];
     heartPoints = [];
     
+    // Read name from URL parameter 'name'
+    let urlParams = new URLSearchParams(window.location.search);
+    let displayName = urlParams.get('name') || config.name;
+    
     const isMobile = p.width < 600 || p.height > p.width;
     
     // Mobile-first sizing
     let padding = p.width * (isMobile ? 0.08 : 0.1);
     let availableWidth = p.width - padding * 2;
     
-    // Mobile-first spacing: More generous tracking on small screens
-    let dynamicSpacing = isMobile ? 2.2 : 2.0; // Reduced from 2.8 to fit better
+    // Mobile-first spacing: Standard tight spacing for most letters
+    let dynamicSpacing = 1.35; 
     
     // Dynamically adjust font size to fit width
     // We calculate a base size and then scale it if it exceeds available width
@@ -145,9 +148,20 @@ new p5((p) => {
     
     // Calculate total width with base font size
     let tempX = 0;
-    for (let char of config.name.split('')) {
+    for (let char of displayName.split('')) {
       let b = font.textBounds(char, 0, 0, baseFontSize);
-      tempX += b.w * dynamicSpacing;
+      let charLower = char.toLowerCase();
+      // Special spacing for narrowest letters only
+      let isNarrow = charLower === 'i' || charLower === 'l';
+      let extraSpace = isNarrow ? 1.8 : (charLower === 'y' ? 1.3 : dynamicSpacing);
+      let advancement = b.w * extraSpace;
+      
+      // Minimum advancement for narrowest clarity
+      if (isNarrow) {
+        advancement = Math.max(advancement, baseFontSize * 0.35);
+      }
+      
+      tempX += advancement;
     }
     
     // If total width is too large, scale down the font size
@@ -158,7 +172,7 @@ new p5((p) => {
     }
     
     // Generate points letter by letter
-    let chars = config.name.split('');
+    let chars = displayName.split('');
     let currentX = 0;
     let allPoints = [];
     
@@ -170,7 +184,18 @@ new p5((p) => {
       allPoints.push(...charPoints);
       
       let bounds = font.textBounds(char, 0, 0, config.fontSize);
-      currentX += bounds.w * dynamicSpacing;
+      let charLower = char.toLowerCase();
+      
+      // Apply the same special spacing for actual rendering
+      let isNarrow = charLower === 'i' || charLower === 'l';
+      let extraSpace = isNarrow ? 2 : (charLower === 'y' ? 1.5 : dynamicSpacing);
+      let advancement = bounds.w * extraSpace;
+      
+      if (isNarrow) {
+        advancement = Math.max(advancement, config.fontSize * 0.35);
+      }
+      
+      currentX += advancement;
     }
     
     // Centering calculations
