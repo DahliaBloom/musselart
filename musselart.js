@@ -13,14 +13,14 @@ new p5((p) => {
     pointDensity: 0.15,
     background: '#000814',
     palette: [
-      '#0050b4', // Primary Heart Blue
-      '#0077b6', // Shimmering Sapphire
-      '#0096c7', // Bright Ocean Blue
-      '#023e8a', // Deep Royal Blue
-      '#03045e', // Deepest Indigo (Blue-biased)
-      '#140152', // Dark Blue-Violet (Very low red)
-      '#22007c', // Deep Electric Indigo
-      '#0d00a4'  // Rich Blue-Violet accent
+      '#0060d0', // Slightly lighter primary blue
+      '#0080e0', // Lighter Shimmering Sapphire
+      '#00a0f0', // Brighter Ocean Blue
+      '#0540b0', // Deep Royal (but lighter)
+      '#0a1080', // Deep Indigo (Lighter bias)
+      '#1a0570', // Dark Blue-Violet
+      '#3010a0', // Deep Electric Indigo
+      '#1510c0'  // Rich Blue-Violet accent
     ],
     friction: 0.84,
     springStrength: 1,
@@ -259,8 +259,8 @@ new p5((p) => {
     p.push();
     p.noFill();
     
-    // Add a wide atmospheric halo behind the whole heart
-    p.stroke(0, 50, 150, 10);
+    // Add a wide atmospheric halo behind the whole heart (slightly lighter)
+    p.stroke(10, 70, 180, 12);
     p.strokeWeight(100);
     p.beginShape();
     for (let v of heartPoints) {
@@ -273,12 +273,28 @@ new p5((p) => {
       let layerRatio = i / numLayers;
       // Recede inwards: scale down and fade out
       let scale = 1 - layerRatio * 0.6;
-      let alpha = p.map(i, 0, numLayers, 60, 5); // Increased starting alpha
-      let weight = p.map(i, 0, numLayers, 3, 0.5); // Increased weight
+      let alpha = p.map(i, 0, numLayers, 60, 10); // Slightly more opaque inwards
+      let weight = p.map(i, 0, numLayers, 3, 0.8);
       
-      // Color shift deeper into the "mirror"
-      p.stroke(0, 80 + i * 5, 180 + i * 8, alpha);
-      p.strokeWeight(weight);
+      // INWARDS COLOR EFFECT: Base blue gradient
+      let baseR = p.lerp(0, 30, layerRatio);
+      let baseG = p.lerp(80, 160, layerRatio);
+      let baseB = p.lerp(180, 255, layerRatio);
+      
+      // ANIMATED PURPLE PULSE: Flows inwards
+      // Using a sine wave based on frameCount and layer index
+      let pulseSpeed = 0.04;
+      let pulseFreq = 0.4;
+      let pulse = p.sin(p.frameCount * pulseSpeed - i * pulseFreq);
+      let purpleStrength = p.max(0, pulse); // Only use the positive part of the wave
+      
+      // Blend base blue with a radiant purple
+      let r = p.lerp(baseR, 140, purpleStrength * 0.7);
+      let g = p.lerp(baseG, 20, purpleStrength * 0.7);
+      let b = p.lerp(baseB, 255, purpleStrength * 0.7);
+      
+      p.stroke(r, g, b, alpha + (purpleStrength * 20)); // Purple is slightly more luminous
+      p.strokeWeight(weight + (purpleStrength * 0.5));
       
       p.beginShape();
       for (let v of heartPoints) {
@@ -297,10 +313,10 @@ new p5((p) => {
       }
       p.endShape(p.CLOSE);
       
-      // Enhanced glow layers for the first few rings
+      // Enhanced glow layers for the first few rings (slightly lighter)
       if (i < 5) {
         p.strokeWeight(weight * 12);
-        p.stroke(0, 60, 150, alpha * 0.4);
+        p.stroke(r, g + 20, b, alpha * 0.3); // Slightly lighter glow
         p.beginShape();
         for (let v of heartPoints) {
           let relX = v.x - p.width / 2;
