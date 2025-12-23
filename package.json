@@ -1,0 +1,23 @@
+{
+  "name": "musselart",
+  "version": "1.0.0",
+  "description": "Interactive fractal mussel art",
+  "scripts": {
+    "deploy": "gh-pages -d ."
+  },
+  "devDependencies": {
+    "gh-pages": "^6.1.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dahliabloom/musselart.git"
+  },
+  "keywords": [
+    "p5.js",
+    "art",
+    "fractal"
+  ],
+  "author": "",
+  "license": "MIT"
+}
+
