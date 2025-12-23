@@ -13,14 +13,14 @@ new p5((p) => {
     pointDensity: 0.15,
     background: '#000814',
     palette: [
-      '#001d3d', // Darkest Navy
-      '#003566', // Deep Blue
-      '#0077b6', // Ocean Blue
-      '#00b4d8', // Sky Blue
-      '#90e0ef', // Light Cyan
-      '#caf0f8', // Crystal White
-      '#ffd6ff', // Hint of Pink Glow
-      '#bde0fe'  // Soft Pastel Blue
+      '#0050b4', // Primary Heart Blue
+      '#0077b6', // Shimmering Sapphire
+      '#0096c7', // Bright Ocean Blue
+      '#023e8a', // Deep Royal Blue
+      '#03045e', // Deepest Indigo (Blue-biased)
+      '#140152', // Dark Blue-Violet (Very low red)
+      '#22007c', // Deep Electric Indigo
+      '#0d00a4'  // Rich Blue-Violet accent
     ],
     friction: 0.84,
     springStrength: 1,
@@ -84,20 +84,27 @@ new p5((p) => {
       p.rotate(this.angleOffset + breathing);
       
       p.noFill();
-      let alpha = p.map(p.sin(p.frameCount * 0.01 + this.lifeOffset), -1, 1, 150, 255);
+      let alpha = p.map(p.sin(p.frameCount * 0.01 + this.lifeOffset), -1, 1, 100, 220); // Slightly increased alpha range
       
-      // Multi-layered stroke for "glow" effect
-      p.stroke(this.color.levels[0], this.color.levels[1], this.color.levels[2], alpha * 0.3);
-      p.strokeWeight(1.5);
-      this.drawShell(p, 4); // Outer soft glow
+      // Multi-layered "Halo" glow effect
+      // 1. Furthest soft halo
+      p.stroke(this.color.levels[0], this.color.levels[1], this.color.levels[2], alpha * 0.12);
+      p.strokeWeight(4.0);
+      this.drawShell(p, 4); 
 
-      p.stroke(this.color.levels[0], this.color.levels[1], this.color.levels[2], alpha);
-      p.strokeWeight(0.7);
-      this.drawShell(p, 4); // Main shell
+      // 2. Medium glow
+      p.stroke(this.color.levels[0], this.color.levels[1], this.color.levels[2], alpha * 0.35);
+      p.strokeWeight(1.8);
+      this.drawShell(p, 4); 
+
+      // 3. Main shell (balanced presence)
+      p.stroke(this.color.levels[0], this.color.levels[1], this.color.levels[2], alpha * 0.9);
+      p.strokeWeight(0.8);
+      this.drawShell(p, 4); 
       
-      // Core highlight
+      // 4. Subtle core highlight (slightly brighter)
       p.noStroke();
-      p.fill(255, 255, 255, alpha * 0.8);
+      p.fill(200, 230, 255, alpha * 0.6);
       p.ellipse(0, 0, 1.2, 1.2);
       p.pop();
     }
@@ -248,39 +255,61 @@ new p5((p) => {
   p.draw = () => {
     p.background(config.background);
 
-    // Draw the background heart with enhanced glow
+    // Draw the background heart with "Mirror Mirror" 3D depth effect and enhanced halo
     p.push();
     p.noFill();
     
-    // Outer most soft aura
-    p.stroke(0, 40, 100, 15);
-    p.strokeWeight(40);
+    // Add a wide atmospheric halo behind the whole heart
+    p.stroke(0, 50, 150, 10);
+    p.strokeWeight(100);
     p.beginShape();
     for (let v of heartPoints) {
-      let n = p.noise(v.x * 0.01, v.y * 0.01, p.frameCount * 0.005) * 15;
-      p.vertex(v.x + n, v.y + n);
+      p.vertex(v.x, v.y);
     }
     p.endShape(p.CLOSE);
 
-    // Medium glow
-    p.stroke(0, 60, 120, 25);
-    p.strokeWeight(15);
-    p.beginShape();
-    for (let v of heartPoints) {
-      let n = p.noise(v.x * 0.01, v.y * 0.01, p.frameCount * 0.008) * 10;
-      p.vertex(v.x + n, v.y + n);
+    let numLayers = 15;
+    for (let i = 0; i < numLayers; i++) {
+      let layerRatio = i / numLayers;
+      // Recede inwards: scale down and fade out
+      let scale = 1 - layerRatio * 0.6;
+      let alpha = p.map(i, 0, numLayers, 60, 5); // Increased starting alpha
+      let weight = p.map(i, 0, numLayers, 3, 0.5); // Increased weight
+      
+      // Color shift deeper into the "mirror"
+      p.stroke(0, 80 + i * 5, 180 + i * 8, alpha);
+      p.strokeWeight(weight);
+      
+      p.beginShape();
+      for (let v of heartPoints) {
+        // Calculate point relative to center for scaling
+        let relX = v.x - p.width / 2;
+        let relY = v.y - p.height / 2;
+        
+        // Add subtle 3D parallax/shimmer
+        let depthShift = p.sin(p.frameCount * 0.01 + i * 0.2) * 5 * layerRatio;
+        let n = p.noise(v.x * 0.01, v.y * 0.01, p.frameCount * 0.005 + i * 0.1) * 10;
+        
+        p.vertex(
+          p.width / 2 + relX * scale + depthShift, 
+          p.height / 2 + relY * scale + depthShift + n
+        );
+      }
+      p.endShape(p.CLOSE);
+      
+      // Enhanced glow layers for the first few rings
+      if (i < 5) {
+        p.strokeWeight(weight * 12);
+        p.stroke(0, 60, 150, alpha * 0.4);
+        p.beginShape();
+        for (let v of heartPoints) {
+          let relX = v.x - p.width / 2;
+          let relY = v.y - p.height / 2;
+          p.vertex(p.width / 2 + relX * scale, p.height / 2 + relY * scale);
+        }
+        p.endShape(p.CLOSE);
+      }
     }
-    p.endShape(p.CLOSE);
-
-    // Core heart line
-    p.stroke(0, 80, 180, 50); 
-    p.strokeWeight(2);
-    p.beginShape();
-    for (let v of heartPoints) {
-      let n = p.noise(v.x * 0.01, v.y * 0.01, p.frameCount * 0.01) * 5;
-      p.vertex(v.x + n, v.y + n);
-    }
-    p.endShape(p.CLOSE);
     p.pop();
 
     p.blendMode(p.SCREEN);
