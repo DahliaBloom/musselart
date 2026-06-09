@@ -46,7 +46,7 @@ new p5((p) => {
 
     let heartScale = p.width * (isMobile ? 0.7 : 0.6) / 32;
 
-    for (let t = 0; t < p.TWO_PI; t += 0.05) {
+    for (let t = 0; t < p.TWO_PI; t += 0.02) {
       let x = 16 * p.pow(p.sin(t), 3);
       let y = -(13 * p.cos(t) - 5 * p.cos(2 * t) - 2 * p.cos(3 * t) - p.cos(4 * t));
       heartPoints.push(p.createVector(x * heartScale + p.width / 2, y * heartScale + p.height / 2));
@@ -83,7 +83,7 @@ new p5((p) => {
     
     // Add a wide atmospheric halo behind the whole heart (slightly lighter)
     p.stroke(10, 70, 180, 12);
-    p.strokeWeight(100);
+    p.strokeWeight(50);
     p.beginShape();
     for (let v of heartPoints) {
       p.vertex(v.x, v.y);
@@ -137,7 +137,7 @@ new p5((p) => {
       
       // Enhanced glow layers for the first few rings (slightly lighter)
       if (i < 5) {
-        p.strokeWeight(weight * 12);
+        p.strokeWeight(weight * 6);
         p.stroke(r, g + 20, b, alpha * 0.3); // Slightly lighter glow
         p.beginShape();
         for (let v of heartPoints) {
