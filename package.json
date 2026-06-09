@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Interactive fractal mussel art",
   "scripts": {
+    "start": "npx serve .",
     "deploy": "gh-pages -d ."
   },
   "devDependencies": {
