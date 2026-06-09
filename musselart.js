@@ -36,17 +36,15 @@ new p5((p) => {
     let availableWidth = p.width - padding * 2;
 
     let baseFontSize = isMobile
-      ? p.constrain(availableWidth * 0.35, 80, 200)
-      : p.constrain(availableWidth * 0.2, 120, 320);
+      ? p.constrain(availableWidth * 0.25, 60, 150)
+      : p.constrain(availableWidth * 0.14, 90, 240);
 
     let bounds = font.textBounds(displayName, 0, 0, baseFontSize);
     config.fontSize = bounds.w > availableWidth
       ? baseFontSize * (availableWidth / bounds.w)
       : baseFontSize;
 
-    let heartScale = isMobile ?
-      p.constrain(availableWidth * 0.06, 15, 35) :
-      p.constrain(availableWidth * 0.04, 20, 30);
+    let heartScale = p.width * (isMobile ? 0.7 : 0.6) / 32;
 
     for (let t = 0; t < p.TWO_PI; t += 0.05) {
       let x = 16 * p.pow(p.sin(t), 3);
